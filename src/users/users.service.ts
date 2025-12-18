@@ -1,15 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from './schemas/user.schema';
+import { UserDocument, User as UserM } from './schemas/user.schema';
 import mongoose, { Model } from 'mongoose';
 import { genSaltSync, hashSync, compareSync } from "bcryptjs";
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto, RegisterUserDto } from './dto/create-user.dto';
+import { IUser } from './users.interface';
+import { User } from 'src/decorator/customize';
+import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 
 @Injectable()
 export class UsersService {
 
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(@InjectModel(UserM.name) private userModel: SoftDeleteModel<UserDocument>) {}
 
   getHashPassword=( password : string ) => {
     const salt = genSaltSync(10);
@@ -17,15 +20,49 @@ export class UsersService {
     return hash;
   }
 
-  async create(hoidanit: CreateUserDto) {
-    const hashPassword = this.getHashPassword(hoidanit.password);
-      // Map incoming fields to schema keys
-      return this.userModel.create({
-        email: hoidanit.email,
-        password: hashPassword,
-        name: hoidanit.name
-      });
+  async create(createUserDto: CreateUserDto, @User() user: IUser) {
+    const { name, email, password, age, gender, address, role, company } = createUserDto;
+
+    // check logic for email
+    const isExist = await this.userModel.findOne({email});
+    if (isExist) {
+      throw new BadRequestException(`Email: ${email} đã tồn tại trên hệ thống. Vui lòng sử dụng email khác`);
+    }
+
+    const hashPassword = this.getHashPassword(password);
     
+    let newUser = await this.userModel.create({
+      name, email,
+      password: hashPassword,
+      age, gender, address, role, company,
+      createdBy: {
+        _id: user._id,
+        email: user.email
+      }
+    })
+      return newUser;
+        
+  }
+
+  async register(user: RegisterUserDto) {
+    const { name, email, password, age, gender, address } = user;
+
+    // check logic for email
+    const isExist = await this.userModel.findOne({email});
+    if (isExist) {
+      throw new BadRequestException(`Email: ${email} đã tồn tại trên hệ thống. Vui lòng sử dụng email khác`);
+    }
+
+    const hashPassword = this.getHashPassword(password);
+    let newRegister = await this.userModel.create ({
+      name, email,
+      password: hashPassword,
+      age,
+      gender,
+      address,
+      role: "USER"
+    })
+    return newRegister;
   }
 
 
