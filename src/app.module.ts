@@ -12,6 +12,7 @@ import { CompaniesModule } from './companies/companies.module';
 import { softDeletePlugin } from 'soft-delete-plugin-mongoose';
 import { JobsModule } from './jobs/jobs.module';
 import { FilesModule } from './files/files.module';
+import { ResumesModule } from './resumes/resumes.module';
 
 
 @Module({
@@ -34,7 +35,7 @@ import { FilesModule } from './files/files.module';
     }),
     UsersModule, 
     AuthModule, 
-    CompaniesModule, JobsModule, FilesModule
+    CompaniesModule, JobsModule, FilesModule, ResumesModule
   ],
   controllers: [AppController, UserController],
   providers: [AppService,
