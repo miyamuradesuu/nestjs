@@ -118,7 +118,7 @@ export class ResumesService {
 
   async remove(id: string, user: IUser) {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return "not found user";
+      return "not found resume";
     }
 
     await this.ResumeModel.updateOne(
