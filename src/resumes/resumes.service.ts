@@ -81,10 +81,22 @@ export class ResumesService {
 
     return this.ResumeModel.findById(id);
   }
+
   async findByUsers(user: IUser) {
     return await this.ResumeModel.find({
       userId: user._id
     })
+      .sort("-createdAt")
+      .populate([
+        {
+          path: "companyId",
+          select: { name: 1 }
+        },
+        {
+          path: "jobId",
+          select: { name: 1 }
+        }
+      ])
   }
 
   async update(id: string, status: string, user: IUser) {

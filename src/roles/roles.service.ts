@@ -74,8 +74,10 @@ export class RolesService {
     if(!mongoose.Types.ObjectId.isValid(id))
       throw new BadRequestException("not found role");
 
-    return (await this.RoleModel.findById(id))
-      .populate({ path: "permissions", select: { _id: 1, apiPath: 1, name: 1, method: 1}})
+    return (await this.RoleModel.findById(id)).populate({ 
+      path: "permissions",
+      select: { _id: 1, apiPath: 1, name: 1, method: 1, module: 1 }
+    })
   }
 
   async update(id: string, updateRoleDto: UpdateRoleDto, user: IUser) {
@@ -98,6 +100,10 @@ export class RolesService {
   }
 
   async remove(id: string, user: IUser) {
+    const foundRole = await this.RoleModel.findById(id);
+    if (foundRole.name === "ADMIN") {
+      throw new BadRequestException("Khong the xoa role ADMIN")
+    }
     await this.RoleModel.updateOne(
       { _id: id },
       {

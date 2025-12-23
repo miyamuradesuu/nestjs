@@ -105,13 +105,15 @@ export class UsersService {
 
     return this.userModel.findOne({
       _id: id,
-    }).select("-password") //exclude pw
+    })
+    .select("-password") //exclude pw
+    .populate({ path: "role", select: { name: 1, _id: 1 } })
   }
 
   findOnebyUsername(username: string) {
     return this.userModel.findOne({
       email: username
-    })
+    }).populate({ path: "role", select: { name: 1, permissions: 1 } })
   }
 
   // true or false
@@ -136,6 +138,10 @@ export class UsersService {
       return "not found user";
     }
 
+    const foundUser = await this.userModel.findById(id);
+    if (foundUser.email === "admin@gmail.com") {
+      throw new BadRequestException("Khong the xoa tai khoan")
+    }
     await this.userModel.updateOne(
       { _id: id },
       {
