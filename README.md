@@ -1,7 +1,7 @@
-### Các bước cần làm để chạy dự án NestJS
+### Steps to run a NestJS project
 
-#### 1. Cài đặt thư viện với câu lệnh: npm i
-#### 2. Chạy dự án với câu lệnh: npm run dev
+#### 1. Install the library with the command: npm i
+#### 2. Run the project with the command: npm run dev
 
 
 =================
